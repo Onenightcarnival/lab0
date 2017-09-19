@@ -13,23 +13,6 @@ using namespace std;
 
 map<string, set<int>> invertedIndex;
 
-//separate those words in each file
-void generateInvertedIndex(string str, int index, map<string, set<int>> &map){
-	stringstream strStream(str);
-	char letter;
-	string word;
-	while(strStream.get(letter)){
-		if(!isalpha(letter)){
-			if(word.size() > 0){
-				map[word].insert(index);
-				word.clear();
-			}
-			continue;
-		}
-		word += letter;
-	}
-}
-
 string intToString(set<int> &set){
 	string str;
 	for(std::set<int>::iterator iter = set.begin(); iter != set.end(); iter++){
@@ -41,19 +24,10 @@ string intToString(set<int> &set){
 	return str;
 }
 
-string printMap(map<string, set<int>> &map){
-	string str;
-    for(std::map<string, set<int>>::iterator iter = map.begin(); iter != map.end(); iter++) {
-        cout << iter->first << ": " << intToString(iter->second) << endl;
-        str += iter->first + ": " + intToString(iter->second) + "\n";
-    }
-    return str;
-}
-
 string build_inverted_index(string filename){
 	ifstream afile;
 	afile.open(filename);
-
+	//get files that need to open
 	vector<string> strs;
 	string str;
 	while(getline(afile, str)){
@@ -64,7 +38,7 @@ string build_inverted_index(string filename){
 	}
 	afile.close();
 	afile.clear();
-
+	//open all the files and store file contents
     vector<string> files;
 	for(int i = 0; i < strs.size(); i++){
 		afile.open(strs[i]);
@@ -83,11 +57,29 @@ string build_inverted_index(string filename){
         afile.close();
         afile.clear();
 	}
-
+	//generate inverted index
 	for(int i = 0; i < files.size(); i++){
-		generateInvertedIndex(files[i], i, invertedIndex);
+		stringstream strStream(files[i]);
+		char letter;
+		string word;
+		while(strStream.get(letter)){
+			if(!isalpha(letter)){
+				if(word.size() > 0){
+					invertedIndex[word].insert(i);
+					word.clear();
+				}
+				continue;
+			}
+			word += letter;
+		}
 	}
+	//print map
+	string result;
+    for(std::map<string, set<int>>::iterator iter = invertedIndex.begin(); iter != invertedIndex.end(); iter++) {
+        cout << iter->first << ": " << intToString(iter->second) << endl;
+        result += iter->first + ": " + intToString(iter->second) + "\n";
+    }
 
-	return printMap(invertedIndex);
+	return result;
 }
 
